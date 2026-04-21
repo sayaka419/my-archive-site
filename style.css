@@ -1,0 +1,203 @@
+/* 基本設定 */
+body { margin: 0; background: #000; color: #fff; font-family: sans-serif; }
+
+/* 曲一覧（レスポンシブ） */
+.song-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.song-item {
+    cursor: pointer;
+    text-align: center;
+    position: relative; /* ボタンをこの枠内に固定するために必要 */
+}
+.song-item img { width: 100%; border-radius: 8px; transition: 0.3s; }
+.song-item img:hover { transform: scale(1.05); }
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 68, 68, 0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    background: #ff0000;
+    transform: scale(1.1);
+}
+
+/* モーダル背景 */
+.modal {
+    display: none; /* JSで flex に切り替える */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+/* モーダルの中身 */
+.modal-content {
+    position: relative;
+    width: 90%;
+    max-width: 1000px;
+    background: #111;
+    padding: 40px 60px;
+    border-radius: 15px;
+}
+
+/* 動画と歌詞の横並び */
+.modal-body {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.video-container { flex: 2; min-width: 300px; }
+.video-container iframe { width: 100%; aspect-ratio: 16 / 9; }
+
+.lyrics-container {
+    flex: 1;
+    min-width: 250px;
+    max-height: 450px;
+    height: 400px; /* 固定の高さ */
+    overflow-y: auto; /* ここでスクロールさせる */
+    background: #222;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#modal-title {
+    font-size: 1.5rem;    /* さっき上げたサイズ */
+    font-weight: bold;
+    letter-spacing: 0.1em; /* これが「エモさ」の隠し味 */
+    background: linear-gradient(45deg, #fff, #91ffdb); /* 白からミントへ */
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+#modal-lyrics {
+    white-space: pre-wrap; /* 改行をそのまま反映 */
+    font-size: 14px;
+    line-height: 1.6;
+    color: #ddd;
+}
+
+#modal-title, #modal-lyrics {
+    white-space: pre-wrap; /* 折り返し */
+    overflow: visible;     /* pre自体にはスクロールバーを出さない */
+}
+
+/* 左右ボタン（オーバーレイ） */
+.nav-btn {
+    all: unset;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 2100;
+}
+
+#prev-btn { left: 5px; }
+#next-btn { right: 5px; }
+.nav-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* 閉じるボタン */
+.close-btn {
+    position: absolute;
+    top: 5px;   /* 少し上に詰める */
+    right: 10px; /* 右端に寄せる */
+    font-size: 35px; /* スマホでも押しやすいデカさ */
+    color: #fff;
+    cursor: pointer;
+    z-index: 3000;   /* 他の何よりも一番上に！ */
+    line-height: 1;
+    text-shadow: 0 0 5px rgba(0,0,0,0.8); /* 背景に埋もれないように影をつける */
+}
+
+#admin-panel input,
+#admin-panel textarea {
+    display: block;        /* 1行ずつ独立させる */
+    width: 100%;           /* 横幅を親いっぱいに */
+    max-width: 500px;      /* 広がりすぎないように制限 */
+    margin-bottom: 10px;   /* 下に隙間を作る */
+    padding: 10px;         /* 内側の余白 */
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+    border-radius: 5px;
+    
+    /* ★これが一番大事！パディングを含めて横幅を計算させる */
+    box-sizing: border-box; 
+    
+    /* テキストエリアとインプットのフォントを強制的に合わせる */
+    font-family: inherit; 
+    font-size: 14px;
+}
+
+#admin-panel textarea {
+    height: 100px;         /* 歌詞用なので高さを出す */
+    resize: vertical;      /* 横に広げられないようにしてレイアウト崩れを防ぐ */
+}
+
+/* スマホ用の微調整（メディアクエリ） */
+@media (max-width: 600px) {
+    /* 1. モーダル本体の設定：上下に余裕を持たせる */
+    .modal {
+        align-items: flex-start; /* 真ん中じゃなく、上から配置 */
+        padding-top: 20px;
+        overflow-y: auto;       /* モーダル自体が長い場合にスクロールできるように */
+    }
+
+    .modal-content {
+        width: 95%;
+        margin-bottom: 20px;    /* 下端がくっつかないように */
+        padding: 50px 15px 20px; /* 上を広げて×ボタンの場所を死守 */
+    }
+
+    /* 2. 歌詞エリア：スマホでは高さを制限して、その中でスクロールさせる */
+    .lyrics-container {
+        max-height: 30vh;       /* 画面の高さの30%までに制限 */
+        overflow-y: auto;       /* これで歌詞の最後も見れる！ */
+        border: 1px solid rgba(255,255,255,0.1); /* 枠をつけると見やすい */
+        padding: 10px;
+    }
+
+    /* 3. 動画：スマホでは少し小さくして圧迫感を減らす */
+    .video-container {
+        min-width: 100%;
+    }
+
+    /* 4. ×ボタン：絶対にタップできる位置に固定 */
+    .close-btn {
+        top: 10px;
+        right: 15px;
+        position: absolute;
+    }
+}

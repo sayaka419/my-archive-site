@@ -1,2 +1,46 @@
-<h1>先輩、開通おめでとう！</h1>
-<p>ここが45曲のアーカイブセンターになる予定地やで。</p>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHINKI Official Music List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>SHINKI MUSIC LIST</h1>
+    </header>
+
+    <div id="song-list" class="song-list"></div>
+
+    <div id="video-modal" class="modal">
+        <div class="modal-content">
+            <button id="prev-btn" class="nav-btn">＜</button>
+            <button id="next-btn" class="nav-btn">＞</button>
+
+            <span class="close-btn">&times;</span>
+
+            <div class="modal-body">
+                <div class="video-container">
+                    <iframe id="modal-video" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+                <div class="lyrics-container">
+                    <pre id="modal-title"></pre>
+                    <pre id="modal-lyrics"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--<section id="admin-panel" style="margin-top: 50px; padding: 20px; border-top: 2px dashed #444;">
+        <h3>曲追加フォーム</h3>
+        <input type="text" id="new-id" placeholder="YouTube動画ID (例: dQw4w9WgXcQ)">
+        <input type="text" id="new-title" placeholder="曲のタイトル">
+        <textarea id="new-lyrics" placeholder="ここに歌詞を貼り付け"></textarea>
+        <button onclick="addNewSong()">リストに追加！</button>
+        <button onclick="clearAllExtraSongs()" style="background: #ff4444; margin-top: 10px;">追加した曲を全部消す</button>
+    </section>-->
+    <script src="songs.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
