@@ -73,7 +73,7 @@ body {
 /* モーダルのコンテンツ自体の幅を少し絞って、ボタンと被らないようにする */
 .modal-content {
     position: relative;
-    width: 75%;
+    width: 80%;
     /* 左右にボタン用のスペースを空けるっす */
     max-width: 800px;
     margin: 5% auto;
