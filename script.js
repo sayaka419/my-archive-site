@@ -1,35 +1,33 @@
-let songs = []; // 曲データを格納する空の配列
+const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwEsvzi5thlcpmqWQhwa2SHLY3pFbr9brjjN9u9t1oya-4B-wKF4agg7vzPksw17PrT5A/exec";
+
+let songs = [];
 let currentSongIndex = 0;
 
-// 1. 【心臓部】GitHub上の data.json を読み込む魔法
+// 1. スプレッドシートからデータを読み込む
 async function loadSongs() {
     try {
-        // 同じフォルダにある data.json を取ってくる
-        const response = await fetch('data.json');
-        if (!response.ok) throw new Error('data.jsonが見つかりません');
+        const response = await fetch(SPREADSHEET_URL);
+        if (!response.ok) throw new Error('ネットワークエラーっす');
+        const data = await response.json();
 
-        const songsData = await response.json();
-
-        // 読み込んだデータを配列に入れる
-        songs = songsData;
-
-        // 画面に曲一覧を描画
+        songs = data;
         renderSongs();
     } catch (error) {
         console.error("データの読み込みに失敗したっす...:", error);
-        // エラーが出た時用のダミー表示
-        document.getElementById('song-list').innerHTML = '<p style="color:white;">曲データが読み込めへんかったわ。data.jsonがあるか確認してな！</p>';
+        document.getElementById('song-list').innerHTML = '<p style="color:white;">スプレッドシートが読み込めへんわ。GASのURLか公開設定を確認してな！</p>';
     }
 }
 
-// 2. 曲一覧を描画する
+// 2. 曲一覧を画面に描画する
 function renderSongs() {
     const songListContainer = document.getElementById('song-list');
-    songListContainer.innerHTML = ''; // 一旦空にする
+    if (!songListContainer) return;
+    songListContainer.innerHTML = '';
 
     songs.forEach((song, index) => {
         const item = document.createElement('div');
         item.className = 'song-item';
+        // サムネイルを自動表示
         item.innerHTML = `
             <img src="https://img.youtube.com/vi/${song.id}/hqdefault.jpg" alt="${song.title}">
             <p>${song.title}</p>
@@ -39,30 +37,44 @@ function renderSongs() {
     });
 }
 
-// 3. モーダルを開く
+// 3. モーダルを開く（HTMLのID名に完璧に合わせました！）
 function openModal(index) {
     currentSongIndex = index;
     const song = songs[index];
 
-    document.getElementById('modal-video').src = `https://www.youtube.com/embed/${song.id}?autoplay=1`;
-    document.getElementById('modal-title').textContent = song.title;
-    document.getElementById('modal-lyrics').textContent = song.lyrics;
-    document.getElementById('video-modal').style.display = 'block';
+    const modal = document.getElementById('video-modal');
+    const iframe = document.getElementById('modal-video');
+    const titleElement = document.getElementById('modal-title');
+    const lyricsElement = document.getElementById('modal-lyrics');
+
+    if (iframe) iframe.src = `https://www.youtube.com/embed/${song.id}?autoplay=1`;
+    if (titleElement) titleElement.textContent = song.title;
+    if (lyricsElement) lyricsElement.textContent = song.lyrics;
+
+    if (modal) modal.style.display = 'block';
 }
 
 // 4. モーダルを閉じる
 document.querySelector('.close-btn').onclick = () => {
-    document.getElementById('video-modal').style.display = 'none';
-    document.getElementById('modal-video').src = ''; // 動画を止める
+    closeModal();
 };
 
-// 5. 前後の曲へのナビゲーション
-document.getElementById('prev-btn').onclick = () => {
+function closeModal() {
+    const modal = document.getElementById('video-modal');
+    const iframe = document.getElementById('modal-video');
+    if (modal) modal.style.display = 'none';
+    if (iframe) iframe.src = '';
+}
+
+// 5. 前後の曲への切り替え（左右ボタン）
+document.getElementById('prev-btn').onclick = (e) => {
+    e.stopPropagation(); // 勝手に閉じないようにガード
     currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
     openModal(currentSongIndex);
 };
 
-document.getElementById('next-btn').onclick = () => {
+document.getElementById('next-btn').onclick = (e) => {
+    e.stopPropagation();
     currentSongIndex = (currentSongIndex + 1) % songs.length;
     openModal(currentSongIndex);
 };
@@ -71,8 +83,7 @@ document.getElementById('next-btn').onclick = () => {
 window.onclick = (event) => {
     const modal = document.getElementById('video-modal');
     if (event.target == modal) {
-        modal.style.display = 'none';
-        document.getElementById('modal-video').src = '';
+        closeModal();
     }
 };
 
