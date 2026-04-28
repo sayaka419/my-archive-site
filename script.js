@@ -10,13 +10,17 @@ async function loadSongs() {
         if (!response.ok) throw new Error('ネットワークエラーっす');
         const data = await response.json();
 
-        // ★ここ！読み込んだデータを逆順にする魔法っす
-        songs = data.reverse();
+        // ★ここが「タイムスタンプ順」の魔法っす！
+        // スプレッドシートの1列目（timestamp）を比較して並び替えるで
+        songs = data.sort((a, b) => {
+            // 新しい日付を上にする（降順）
+            return new Date(b.timestamp) - new Date(a.timestamp);
+        });
 
         renderSongs();
     } catch (error) {
         console.error("データの読み込みに失敗したっす...:", error);
-        document.getElementById('song-list').innerHTML = '<p style="color:white;">スプレッドシートが読み込めへんわ。GASのURLか公開設定を確認してな！</p>';
+        document.getElementById('song-list').innerHTML = '<p style="color:white;">読み込めへんわ。URLか公開設定を確認してな！</p>';
     }
 }
 
