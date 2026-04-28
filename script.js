@@ -1,50 +1,80 @@
-const SPREADSHEET_URL = "https://script.google.com/macros/s/AKfycbwEsvzi5thlcpmqWQhwa2SHLY3pFbr9brjjN9u9t1oya-4B-wKF4agg7vzPksw17PrT5A/exec";
+let songs = []; // 曲データを格納する空の配列
+let currentSongIndex = 0;
 
+// 1. 【心臓部】GitHub上の data.json を読み込む魔法
 async function loadSongs() {
     try {
-        const response = await fetch(SPREADSHEET_URL);
-        const data = await response.json();
-        const listElement = document.getElementById('song-list');
-        if (!listElement) return;
-        listElement.innerHTML = '';
+        // 同じフォルダにある data.json を取ってくる
+        const response = await fetch('data.json');
+        if (!response.ok) throw new Error('data.jsonが見つかりません');
 
-        data.forEach((song) => {
-            const li = document.createElement('li');
-            li.className = 'song-item';
-            li.innerHTML = `<strong>${song.title}</strong>`;
-            // クリックされたらその曲のデータを渡す
-            li.onclick = () => openModal(song);
-            listElement.appendChild(li);
-        });
+        const songsData = await response.json();
+
+        // 読み込んだデータを配列に入れる
+        songs = songsData;
+
+        // 画面に曲一覧を描画
+        renderSongs();
     } catch (error) {
-        console.error("読み込みエラーっす:", error);
+        console.error("データの読み込みに失敗したっす...:", error);
+        // エラーが出た時用のダミー表示
+        document.getElementById('song-list').innerHTML = '<p style="color:white;">曲データが読み込めへんかったわ。data.jsonがあるか確認してな！</p>';
     }
 }
 
-function openModal(song) {
-    const modal = document.getElementById('modal');
-    // 【重要】クリックされた瞬間に、改めてHTMLの箱（ID）を探す！
-    const iframe = document.getElementById('modal-video');
-    const lyricsElement = document.getElementById('modal-lyrics');
-    const titleElement = document.getElementById('modal-title');
+// 2. 曲一覧を描画する
+function renderSongs() {
+    const songListContainer = document.getElementById('song-list');
+    songListContainer.innerHTML = ''; // 一旦空にする
 
-    if (iframe) {
-        iframe.src = `https://www.youtube.com/embed/${song.id}`;
-    } else {
-        console.error("modal-video というIDのタグが見つからへんで！");
+    songs.forEach((song, index) => {
+        const item = document.createElement('div');
+        item.className = 'song-item';
+        item.innerHTML = `
+            <img src="https://img.youtube.com/vi/${song.id}/hqdefault.jpg" alt="${song.title}">
+            <p>${song.title}</p>
+        `;
+        item.onclick = () => openModal(index);
+        songListContainer.appendChild(item);
+    });
+}
+
+// 3. モーダルを開く
+function openModal(index) {
+    currentSongIndex = index;
+    const song = songs[index];
+
+    document.getElementById('modal-video').src = `https://www.youtube.com/embed/${song.id}?autoplay=1`;
+    document.getElementById('modal-title').textContent = song.title;
+    document.getElementById('modal-lyrics').textContent = song.lyrics;
+    document.getElementById('video-modal').style.display = 'block';
+}
+
+// 4. モーダルを閉じる
+document.querySelector('.close-btn').onclick = () => {
+    document.getElementById('video-modal').style.display = 'none';
+    document.getElementById('modal-video').src = ''; // 動画を止める
+};
+
+// 5. 前後の曲へのナビゲーション
+document.getElementById('prev-btn').onclick = () => {
+    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    openModal(currentSongIndex);
+};
+
+document.getElementById('next-btn').onclick = () => {
+    currentSongIndex = (currentSongIndex + 1) % songs.length;
+    openModal(currentSongIndex);
+};
+
+// 窓の外をクリックしたら閉じる
+window.onclick = (event) => {
+    const modal = document.getElementById('video-modal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+        document.getElementById('modal-video').src = '';
     }
+};
 
-    if (lyricsElement) lyricsElement.textContent = song.lyrics;
-    if (titleElement) titleElement.textContent = song.title;
-
-    if (modal) modal.style.display = 'block';
-}
-
-function closeModal() {
-    const modal = document.getElementById('modal');
-    const iframe = document.getElementById('modal-video');
-    if (modal) modal.style.display = 'none';
-    if (iframe) iframe.src = '';
-}
-
-window.onload = loadSongs;
+// ページ読み込み時に実行！
+loadSongs();
