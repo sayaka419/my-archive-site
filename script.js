@@ -5,42 +5,46 @@ async function loadSongs() {
         const response = await fetch(SPREADSHEET_URL);
         const data = await response.json();
         const listElement = document.getElementById('song-list');
-        listElement.innerHTML = ''; // リストを空にする
+        if (!listElement) return;
+        listElement.innerHTML = '';
 
-        data.forEach((song, index) => {
+        data.forEach((song) => {
             const li = document.createElement('li');
             li.className = 'song-item';
             li.innerHTML = `<strong>${song.title}</strong>`;
+            // クリックされたらその曲のデータを渡す
             li.onclick = () => openModal(song);
             listElement.appendChild(li);
         });
     } catch (error) {
-        console.error("データの読み込みに失敗したで:", error);
-        document.getElementById('song-list').innerHTML = "<li>データが読み込めないよってでてくる</li>";
+        console.error("読み込みエラーっす:", error);
     }
 }
 
 function openModal(song) {
     const modal = document.getElementById('modal');
-    // ↓ ここ！ 'youtube-video' を 'modal-video' に変更っす！
+    // 【重要】クリックされた瞬間に、改めてHTMLの箱（ID）を探す！
     const iframe = document.getElementById('modal-video');
     const lyricsElement = document.getElementById('modal-lyrics');
-    const titleElement = document.getElementById('modal-title'); // タイトルも表示できるで！
+    const titleElement = document.getElementById('modal-title');
 
-    iframe.src = `https://www.youtube.com/embed/${song.id}`;
-    lyricsElement.textContent = song.lyrics;
-    if (titleElement) titleElement.textContent = song.title; // タイトル表示用の箱があれば入れる
+    if (iframe) {
+        iframe.src = `https://www.youtube.com/embed/${song.id}`;
+    } else {
+        console.error("modal-video というIDのタグが見つからへんで！");
+    }
 
-    modal.style.display = 'block';
+    if (lyricsElement) lyricsElement.textContent = song.lyrics;
+    if (titleElement) titleElement.textContent = song.title;
+
+    if (modal) modal.style.display = 'block';
 }
 
 function closeModal() {
     const modal = document.getElementById('modal');
-    // ↓ ここも！ 'youtube-video' を 'modal-video' に変更！
     const iframe = document.getElementById('modal-video');
-    modal.style.display = 'none';
-    iframe.src = '';
+    if (modal) modal.style.display = 'none';
+    if (iframe) iframe.src = '';
 }
 
-// サイトを開いた時に曲を読み込む
 window.onload = loadSongs;
