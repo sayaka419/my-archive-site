@@ -10,7 +10,9 @@ async function loadSongs() {
         if (!response.ok) throw new Error('ネットワークエラーっす');
         const data = await response.json();
 
-        songs = data;
+        // ★ここ！読み込んだデータを逆順にする魔法っす
+        songs = data.reverse();
+
         renderSongs();
     } catch (error) {
         console.error("データの読み込みに失敗したっす...:", error);
