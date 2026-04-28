@@ -22,22 +22,24 @@ async function loadSongs() {
 
 function openModal(song) {
     const modal = document.getElementById('modal');
-    const iframe = document.getElementById('youtube-video');
+    // ↓ ここ！ 'youtube-video' を 'modal-video' に変更っす！
+    const iframe = document.getElementById('modal-video');
     const lyricsElement = document.getElementById('modal-lyrics');
+    const titleElement = document.getElementById('modal-title'); // タイトルも表示できるで！
 
-    // YouTubeのURLをセット（IDから埋め込み用URLを作る）
     iframe.src = `https://www.youtube.com/embed/${song.id}`;
-    // 歌詞をセット（<pre>タグのおかげで改行がそのまま反映されるっす！）
     lyricsElement.textContent = song.lyrics;
+    if (titleElement) titleElement.textContent = song.title; // タイトル表示用の箱があれば入れる
 
     modal.style.display = 'block';
 }
 
 function closeModal() {
     const modal = document.getElementById('modal');
-    const iframe = document.getElementById('youtube-video');
+    // ↓ ここも！ 'youtube-video' を 'modal-video' に変更！
+    const iframe = document.getElementById('modal-video');
     modal.style.display = 'none';
-    iframe.src = ''; // 閉じたら動画を止めるっす
+    iframe.src = '';
 }
 
 // サイトを開いた時に曲を読み込む
